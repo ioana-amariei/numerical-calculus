@@ -1,15 +1,18 @@
 import com.google.common.base.Stopwatch;
+import model.Approximation;
+import model.Polynomial;
+import model.Term;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 class Utils {
-    public static final double C1 = 0.16666666666666666666666666666667;
-    public static final double C2 = 0.00833333333333333333333333333333;
-    public static final double C3 = 1.984126984126984126984126984127e-4;
-    public static final double C4 = 2.7557319223985890652557319223986e-6;
-    public static final double C5 = 2.5052108385441718775052108385442e-8;
-    public static final double C6 = 1.6059043836821614599392377170155e-10;
+    private static final double C1 = 0.16666666666666666666666666666667;
+    private static final double C2 = 0.00833333333333333333333333333333;
+    private static final double C3 = 1.984126984126984126984126984127e-4;
+    private static final double C4 = 2.7557319223985890652557319223986e-6;
+    private static final double C5 = 2.5052108385441718775052108385442e-8;
+    private static final double C6 = 1.6059043836821614599392377170155e-10;
 
     private static final Term term1 = new Term(1.0, 1);
     private static final Term term2 = new Term(-Utils.C1, 3);
@@ -37,6 +40,18 @@ class Utils {
                     put("P6", P6);
                 }
             };
+    private static Comparator<Map.Entry<String, Approximation>> errorComparator = new Comparator<Map.Entry<String, Approximation>>() {
+        @Override
+        public int compare(Map.Entry<String, Approximation> o1, Map.Entry<String, Approximation> o2) {
+            return o1.getValue().getError().compareTo(o2.getValue().getError());
+        }
+    };
+    private static Comparator<Map.Entry<String, Approximation>> timeComparator = new Comparator<Map.Entry<String, Approximation>>() {
+        @Override
+        public int compare(Map.Entry<String, Approximation> o1, Map.Entry<String, Approximation> o2) {
+            return o1.getValue().getTotalTime().compareTo(o2.getValue().getTotalTime());
+        }
+    };
 
     private static List<Term> p1() {
         return Arrays.asList(term1, term2, term3);
@@ -65,11 +80,11 @@ class Utils {
         return Arrays.asList(term1, term2, term3, term4, term5, term6, term7);
     }
 
-    public static double getRandomDoubleBetweenRange(double min, double max) {
+    private static double getRandomDoubleBetweenRange(double min, double max) {
         return (Math.random() * ((max - min) + 1)) + min;
     }
 
-    double getMachineAccuracy() {
+    public static double getMachineAccuracy() {
         double u = 1.0;
 
         while (1.0d + u != 1.0d) {
@@ -79,7 +94,7 @@ class Utils {
         return u;
     }
 
-    boolean checkAdditionOperationAssociativity() {
+    public static boolean checkAdditionOperationAssociativity() {
         double x = 1.0;
         double y = getMachineAccuracy();
         double z = getMachineAccuracy();
@@ -90,7 +105,7 @@ class Utils {
         return firstExpression != secondExpression;
     }
 
-    boolean checkMultiplicationOperationAssociativity() {
+    public static boolean checkMultiplicationOperationAssociativity() {
         double x = 1.01;
         double y = getMachineAccuracy();
         double z = getMachineAccuracy();
@@ -102,7 +117,7 @@ class Utils {
         return firstExpression != secondExpression;
     }
 
-    public Map<String, Approximation> computeApproximations() {
+    public static Map<String, Approximation> computeApproximations() {
         HashMap<String, Approximation> approximations = new HashMap<>();
 
         double min = -Math.PI / 2;
@@ -129,8 +144,8 @@ class Utils {
         return approximations;
     }
 
-    public void printApproximationsInOrderOfAccuracy(Map<String, Approximation> approximations){
-        Set<Map.Entry<String, Approximation>> entries = computeApproximations().entrySet();
+    public static void printApproximationsInOrderOfAccuracy(Map<String, Approximation> approximations) {
+        Set<Map.Entry<String, Approximation>> entries = approximations.entrySet();
         List<Map.Entry<String, Approximation>> sortedEntries = new LinkedList<>(entries);
         sortedEntries.sort(errorComparator);
 
@@ -138,8 +153,8 @@ class Utils {
         print(sortedEntries);
     }
 
-    public void printApproximationsInOrderOfTime(Map<String, Approximation> approximations){
-        Set<Map.Entry<String, Approximation>> entries = computeApproximations().entrySet();
+    public static void printApproximationsInOrderOfTime(Map<String, Approximation> approximations) {
+        Set<Map.Entry<String, Approximation>> entries = approximations.entrySet();
         List<Map.Entry<String, Approximation>> sortedEntries = new LinkedList<>(entries);
         sortedEntries.sort(timeComparator);
 
@@ -147,27 +162,11 @@ class Utils {
         print(sortedEntries);
     }
 
-    private void print(List<Map.Entry<String, Approximation>> sortedEntries) {
+    private static void print(List<Map.Entry<String, Approximation>> sortedEntries) {
         for (Map.Entry<String, Approximation> entry : sortedEntries) {
             System.out.println(entry);
         }
     }
-
-    private Comparator<Map.Entry<String, Approximation>> errorComparator = new Comparator<Map.Entry<String, Approximation>>() {
-        @Override
-        public int compare(Map.Entry<String, Approximation> o1, Map.Entry<String, Approximation> o2) {
-            return o1.getValue().getError().compareTo(o2.getValue().getError());
-        }
-    };
-
-    private Comparator<Map.Entry<String, Approximation>> timeComparator = new Comparator<Map.Entry<String, Approximation>>() {
-        @Override
-        public int compare(Map.Entry<String, Approximation> o1, Map.Entry<String, Approximation> o2) {
-            return o1.getValue().getTotalTime().compareTo(o2.getValue().getTotalTime());
-        }
-    };
-
-
 }
 
 

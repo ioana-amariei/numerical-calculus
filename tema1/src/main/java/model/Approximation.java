@@ -1,3 +1,5 @@
+package model;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class Approximation {
 
     @Override
     public String toString() {
-        return "Approximation{" +
+        return "model.Approximation{" +
                 "values=" + getError() +
                 ", times=" + getTotalTime() +
                 '}';
