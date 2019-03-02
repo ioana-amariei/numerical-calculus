@@ -46,6 +46,7 @@ class Utils {
             return o1.getValue().getError().compareTo(o2.getValue().getError());
         }
     };
+
     private static Comparator<Map.Entry<String, Approximation>> timeComparator = new Comparator<Map.Entry<String, Approximation>>() {
         @Override
         public int compare(Map.Entry<String, Approximation> o1, Map.Entry<String, Approximation> o2) {
