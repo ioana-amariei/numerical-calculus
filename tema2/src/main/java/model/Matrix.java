@@ -7,6 +7,7 @@ package model;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -45,6 +46,21 @@ public class Matrix {
                 matrix[i][j] = scanner.nextDouble();
             }
         }
+    }
+
+    public Matrix(String inputMatrix, boolean b) {
+        Scanner scanner = new Scanner(inputMatrix);
+        int lines = scanner.nextInt();
+        int columns = scanner.nextInt();
+        n = lines;
+
+        matrix = new double[lines + 1][columns + 1];
+        for (int i = 1; i <= lines; ++i) {
+            for (int j = 1; j <= columns; ++j) {
+                matrix[i][j] = scanner.nextDouble();
+            }
+        }
+
     }
 
     public void LUDecomposition2() {
@@ -103,11 +119,8 @@ public class Matrix {
     public double[][] getMatrix1() {
         double[][] m = new double[n][n];
 
-        System.out.println(n);
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= n; j++) {
-                System.out.println(i + " " + j);
-                System.out.flush();
                 m[i - 1][j - 1] = matrix[i][j];
             }
         }
@@ -279,4 +292,19 @@ public class Matrix {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < matrix.length; ++i) {
+            for (int j = 1; j < matrix[0].length; ++j) {
+                sb.append(matrix[i][j]);
+                sb.append(" ");
+            }
+
+            sb.append("\n");
+        }
+
+        return sb.toString();
+
+    }
 }

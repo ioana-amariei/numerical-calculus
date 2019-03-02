@@ -1,3 +1,7 @@
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import model.Matrix;
 
 import java.io.File;
@@ -5,8 +9,18 @@ import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Scanner;
 
-public class Application {
+public class Main extends javafx.application.Application {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+        primaryStage.setTitle("Hello World");
+        primaryStage.setScene(new Scene(root, 300, 275));
+        primaryStage.show();
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
+        launch(args);
+
         Matrix A = new Matrix("matrix1.txt");
         Matrix Ainit = new Matrix("matrix1.txt");
 
@@ -29,9 +43,15 @@ public class Application {
 
         System.out.println("---------------Jama Library--------------");
         Jama.Matrix matrix = new Jama.Matrix(readMatrix("matrix1.txt"));
-        Jama.Matrix B = new Jama.Matrix(new double[][]{{1}, {2}, {3}});
+        double[][] a = {{1}, {2}, {3}};
+        System.out.println(a.length);
+        System.out.println(a[0].length);
+        System.out.println(a[1].length);
+        Jama.Matrix B = new Jama.Matrix(a);
+
+        B.print(2,3);
         Jama.Matrix result = matrix.solve(B);
-        result.transpose().print(10,10);
+        result.transpose().print(10, 10);
 
         double norm1 = norm2(Arrays.copyOfRange(x, 1, x.length), result.transpose().getArray()[0]);
         System.out.println(norm1);
@@ -45,7 +65,7 @@ public class Application {
         double sum = 0;
         for (int i = 0; i < a.length; i++) {
             double diff = a[i] - b[i];
-            sum += diff * diff ;
+            sum += diff * diff;
         }
 
         return Math.sqrt(sum);
