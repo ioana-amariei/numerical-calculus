@@ -5,84 +5,162 @@
 
 package model;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Objects;
+import java.util.Scanner;
 
 public class Matrix {
-    private int dim;
-    private double[][] array;
+    private static double precision = Math.pow(10, -5);
+    private int n;
+    private double[][] matrix;
 
     public Matrix(int dim) {
-        this.dim = dim;
-        this.array = new double[dim][dim];
+        this.n = dim;
+        this.matrix = new double[dim][dim];
     }
 
-    public Matrix(double[][] array) {
-        dim = array.length;
-        this.array = new double[dim][dim];
+    public Matrix(double[][] matrix) {
+        Objects.requireNonNull(matrix);
 
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                this.array[i][j] = array[i][j];
+        n = matrix.length;
+        this.matrix = new double[n][n];
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                this.matrix[i][j] = matrix[i][j];
             }
         }
     }
 
-    public Matrix deepCopy() {
-        if (array == null) {
-            return null;
+    public Matrix(String matrixFile) throws FileNotFoundException {
+        Scanner scanner = new Scanner(new File(matrixFile));
+        int lines = scanner.nextInt();
+        int columns = scanner.nextInt();
+        n = lines;
+
+        matrix = new double[lines + 1][columns + 1];
+        for (int i = 1; i <= lines; ++i) {
+            for (int j = 1; j <= columns; ++j) {
+                matrix[i][j] = scanner.nextDouble();
+            }
         }
-
-        final double[][] copy = new double[dim][dim];
-
-        for (int i = 0; i < array.length; i++) {
-            copy[i] = Arrays.copyOf(array[i], array[i].length);
-        }
-
-        return new Matrix(copy);
     }
 
-    public void decompose() {
-        double[][] upper = new double[dim][dim];
-        double[][] lower = new double[dim][dim];
-
-        if (!this.isNonsingular()) {
-            System.out.println("The LU Decomposition cannot be solved");
-            return;
+    public void LUDecomposition2() {
+        if (!isNonsingular()) {
+            throw new IllegalStateException("There is no LU Decomposition for this matrix.");
         }
 
-        for (int i = 0; i < dim; i++) {
-            // upper triangular
-            for (int p = i; p < dim; p++) {
-                // L(i, k) * U(k, p)
-                double sum = 0;
-                for (int k = 0; k < i; k++) {
-                    sum += lower[i][k] * upper[k][p];
+        for (int p = 1; p <= n; p++) {
+            // calculul elementelor coloanei p din U
+            for (int i = 1; i <= p - 1; i++) {
+                double bip = 0;
+                for (int k = 1; k <= i - 1; k++) {
+                    bip += matrix[i][k] * matrix[k][p];
                 }
-                upper[i][p] = array[i][p] - sum;
-                array[i][p] = upper[i][p];
+
+                matrix[i][p] = (matrix[i][p] - bip) / matrix[i][i];
             }
 
-            // lower triangular
-            for (int p = i; p < dim; p++) {
-                // L(p, k) * U(k, i)
-                double sum = 0;
-                for (int k = 0; k < i; k++) {
-                    sum += lower[p][k] * upper[k][i];
+            // calculul elementelor liniei p din L
+            for (int i = 1; i <= p; i++) {
+                double bip = 0;
+                for (int k = 1; k <= i - 1; k++) {
+                    bip += matrix[p][k] * matrix[k][i];
                 }
-                lower[p][i] = (array[p][i] - sum) / upper[i][i];
-                array[p][i] = lower[p][i];
+
+                matrix[p][i] = matrix[p][i] - bip;
+            }
+        }
+    }
+
+    public double[] solve(double[] b) {
+        double[] y = new double[b.length];
+
+        for (int i = 1; i <= n; i++) {
+            double sum = 0;
+            for (int j = 1; j <= i - 1; j++) {
+                sum += matrix[i][j] * y[j];
+            }
+            y[i] = (b[i] - sum) / matrix[i][i];
+        }
+
+        double[] x = new double[b.length];
+
+        for (int i = n; i >= 1; i--) {
+            double sum = 0;
+            for (int j = i + 1; j <= n; j++) {
+                sum += matrix[i][j] * x[j];
+            }
+
+            x[i] = y[i] - sum;
+        }
+
+        return x;
+    }
+
+    public double[][] getMatrix1() {
+        double[][] m = new double[n][n];
+
+        System.out.println(n);
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
+                System.out.println(i + " " + j);
+                System.out.flush();
+                m[i - 1][j - 1] = matrix[i][j];
             }
         }
 
+        return m;
+    }
+
+    public double norm2(double[] x, double[] b) {
+        Matrix z = this.multiply(x).minus(b);
+
+        double sum = 0;
+        for (int i = 1; i <= n; i++) {
+            sum += z.matrix[1][i] * z.matrix[1][i];
+        }
+
+        return Math.sqrt(sum);
+    }
+
+    private Matrix minus(double[] b) {
+        for (int i = 1; i < b.length; i++) {
+            this.matrix[1][i] -= b[i];
+        }
+
+        return this;
+    }
+
+    private Matrix multiply(double[] x) {
+        double[][] m = new double[2][x.length + 1];
+
+        for (int i = 1; i < x.length; i++) {
+            double sum = 0;
+            for (int j = 1; j < x.length; j++) {
+                sum += this.matrix[i][j] * x[j];
+            }
+            m[1][i] = sum;
+        }
+
+        this.matrix = m;
+
+        return this;
+    }
+
+    private boolean isZero(double value) {
+        return Math.abs(value) <= precision;
     }
 
     public Matrix multiply(Matrix other) {
-        Matrix result = new Matrix(other.dim);
+        Matrix result = new Matrix(other.n);
 
-        for (int i = 0; i < this.dim; i++) {
-            for (int j = 0; j < other.array[0].length; j++) {
-                for (int k = 0; k < this.array[0].length; k++) {
-                    result.array[i][j] += this.array[i][k] * other.array[k][j];
+        for (int i = 0; i < this.n; i++) {
+            for (int j = 0; j < other.matrix[0].length; j++) {
+                for (int k = 0; k < this.matrix[0].length; k++) {
+                    result.matrix[i][j] += this.matrix[i][k] * other.matrix[k][j];
                 }
             }
         }
@@ -91,8 +169,8 @@ public class Matrix {
     }
 
     private boolean isNonsingular() {
-        for (int i = 0; i < dim; i++) {
-            if (array[i][i] == 0) {
+        for (int i = 1; i <= n; i++) {
+            if (isZero(matrix[i][i])) {
                 return false;
             }
         }
@@ -101,12 +179,12 @@ public class Matrix {
     }
 
     public Matrix getUpper() {
-        Matrix result = new Matrix(dim);
-        double[][] U = result.getArray();
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
+        Matrix result = new Matrix(n);
+        double[][] U = result.getMatrix();
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
                 if (i <= j) {
-                    U[i][j] = array[i][j];
+                    U[i][j] = matrix[i][j];
                 } else {
                     U[i][j] = 0.0;
                 }
@@ -117,12 +195,12 @@ public class Matrix {
     }
 
     public Matrix getLower() {
-        Matrix result = new Matrix(dim);
-        double[][] L = result.getArray();
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
+        Matrix result = new Matrix(n);
+        double[][] L = result.getMatrix();
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
                 if (i > j) {
-                    L[i][j] = array[i][j];
+                    L[i][j] = matrix[i][j];
                 } else if (i == j) {
                     L[i][j] = 1.0;
                 } else {
@@ -133,26 +211,72 @@ public class Matrix {
         return result;
     }
 
-    public int getDim() {
-        return dim;
+    public double det() {
+        return detL() * detU();
     }
 
-    public double[][] getArray() {
-        return array;
+    private double detL() {
+        double det = 1;
+        for (int i = 1; i <= n; i++) {
+            det *= matrix[i][i];
+        }
+
+        return det;
+    }
+
+    private double detU() {
+        return 1;
+    }
+
+    private double det(double[][] matrix) {
+        double temporary[][];
+        double result = 0;
+
+        if (matrix.length == 1) {
+            result = matrix[0][0];
+            return (result);
+        }
+
+        if (matrix.length == 2) {
+            result = ((matrix[0][0] * matrix[1][1]) - (matrix[0][1] * matrix[1][0]));
+            return (result);
+        }
+
+        for (int i = 0; i < matrix[0].length; i++) {
+            temporary = new double[matrix.length - 1][matrix[0].length - 1];
+
+            for (int j = 1; j < matrix.length; j++) {
+                for (int k = 0; k < matrix[0].length; k++) {
+                    if (k < i) {
+                        temporary[j - 1][k] = matrix[j][k];
+                    } else if (k > i) {
+                        temporary[j - 1][k - 1] = matrix[j][k];
+                    }
+                }
+            }
+
+            result += matrix[0][i] * Math.pow(-1, (double) i) * det(temporary);
+        }
+        return result;
+    }
+
+    public int getN() {
+        return n;
+    }
+
+    public double[][] getMatrix() {
+        return matrix;
     }
 
     public void print() {
-        for(double[] row : array){
-            System.out.println(Arrays.toString(row));
+        for (int i = 1; i < matrix.length; ++i) {
+            for (int j = 1; j < matrix[0].length; ++j) {
+                System.out.print(matrix[i][j]);
+                System.out.print(" ");
+            }
+
+            System.out.println();
         }
-        System.out.println("\n");
     }
 
-    @Override
-    public String toString() {
-        return "Matrix{" +
-                "dim=" + dim +
-                ", array=" + Arrays.deepToString(array) +
-                '}';
-    }
 }
