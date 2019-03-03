@@ -1,9 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SparseMatrix {
     private int n;
@@ -26,7 +24,7 @@ public class SparseMatrix {
         Scanner scanner = new Scanner(new File(filename));
 
         n = Integer.parseInt(scanner.nextLine());
-        while (scanner.hasNextLine()) {
+        while(scanner.hasNextLine()) {
             String[] lineItems = scanner.nextLine().split(", ");
 
             double value = Double.valueOf(lineItems[0]);
@@ -34,10 +32,12 @@ public class SparseMatrix {
             int column = Integer.valueOf(lineItems[2]);
 
             add(value, line, column);
+//            System.out.println(Arrays.toString(lineItems));
         }
     }
 
     public void add(double value, int line, int column) {
+//        System.out.println(String.format("%s, %s, %s", value, line, column));
         Map<Integer, Double> m = matrix.get(line);
         if (Objects.isNull(m)) {
             m = new HashMap<>();
@@ -67,46 +67,22 @@ public class SparseMatrix {
         return c;
     }
 
-    private double dotProduct(Map<Integer, Double> line, Map<Integer, Double> column) {
-        double result = 0;
-
-        for (Map.Entry<Integer, Double> elem : line.entrySet()) {
-            result += elem.getValue() * column.getOrDefault(elem.getKey(), 0.0);
-        }
-
-        return result;
-    }
-
     public SparseMatrix times(SparseMatrix b) {
         SparseMatrix c = new SparseMatrix(this.n);
 
-        for (Map.Entry<Integer, Map<Integer, Double>> line : matrix.entrySet()) {
-            for (Map.Entry<Integer, Double> column : line.getValue().entrySet()) {
-                int i = line.getKey();
-                int j = column.getKey();
+        for (Map.Entry<Integer, Map<Integer, Double>> leftLine : matrix.entrySet()) {
+            for (Map.Entry<Integer, Double> column : leftLine.getValue().entrySet()) {
+                double e1 = column.getValue();
+                for (Map.Entry<Integer, Double> rightLine : b.matrix.get(column.getKey()).entrySet()) {
+                    double e2 = rightLine.getValue();
 
-                Map<Integer, Double> first = line.getValue();
-                Map<Integer, Double> second = b.getColumn(j);
-
-                double value = dotProduct(first, second);
-                c.add(value, i, j);
+                    double value = e1 * e2;
+                    c.add(value, leftLine.getKey(), rightLine.getKey());
+                }
             }
         }
 
         return c;
-    }
-
-    private Map<Integer, Double> getColumn(Integer n) {
-        Map<Integer, Double> column = new HashMap<>();
-
-        for (Map.Entry<Integer, Map<Integer, Double>> line : matrix.entrySet()) {
-            Double value = line.getValue().get(n);
-            if (value != null) {
-                column.put(line.getKey(), value);
-            }
-        }
-
-        return column;
     }
 
     public double[] times(double[] b) {
