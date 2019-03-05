@@ -1,13 +1,7 @@
-/**
- * https://math.nist.gov/javanumerics/jama/doc/
- * https://stackoverflow.com/questions/19648240/java-best-way-to-print-2d-array
- */
-
 package model;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -63,7 +57,7 @@ public class Matrix {
 
     }
 
-    public void LUDecomposition2() {
+    public void LUDecomposition() {
         if (!isNonsingular()) {
             throw new IllegalStateException("There is no LU Decomposition for this matrix.");
         }
@@ -192,7 +186,7 @@ public class Matrix {
     }
 
     public Matrix getUpper() {
-        Matrix result = new Matrix(n);
+        Matrix result = new Matrix(n + 1);
         double[][] U = result.getMatrix();
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= n; j++) {
@@ -208,7 +202,7 @@ public class Matrix {
     }
 
     public Matrix getLower() {
-        Matrix result = new Matrix(n);
+        Matrix result = new Matrix(n + 1);
         double[][] L = result.getMatrix();
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= n; j++) {

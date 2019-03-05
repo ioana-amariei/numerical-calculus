@@ -81,7 +81,7 @@ public class Controller {
         Matrix A = new Matrix(inputMatrix, true);
         Matrix Ainit = new Matrix(inputMatrix, true);
 
-        A.LUDecomposition2();
+        A.LUDecomposition();
         LUDecompositionTextArea.setText(A.toString());
 
         double[] b = getPrependedArray(vectorTextArea.getText());

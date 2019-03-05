@@ -9,12 +9,12 @@ import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Scanner;
 
-public class Main extends javafx.application.Application {
+public class Main extends javafx.application.Application{
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 300, 275));
+        primaryStage.setTitle("Homework 2");
+        primaryStage.setScene(new Scene(root, 1000, 800));
         primaryStage.show();
     }
 
@@ -28,36 +28,43 @@ public class Main extends javafx.application.Application {
         A.print();
 
         System.out.println("-----------DECOMPOSED-----------");
-        A.LUDecomposition2();
+        A.LUDecomposition();
         A.print();
 
-        System.out.println(A.det());
-        System.out.println("Determinant: " + Ainit.det() + "\n");
+        System.out.println("-----------UPPER-----------");
+        System.out.println(A.getUpper());
 
+        System.out.println("-----------LOWER-----------");
+        System.out.println(A.getLower());
+
+        System.out.println("-----------DETERMINANT-----------");
+        System.out.println("det(A) = " + A.det());
+        System.out.println("det(Ainit) = " + Ainit.det() + "\n");
+
+        System.out.println("-----------SYSTEM SOLUTION-----------");
         double[] b = new double[]{0, 1, 2, 3};
-
         double[] x = A.solve(b);
-        System.out.println(Arrays.toString(x));
+        System.out.println("Ax = b => x = " + Arrays.toString(x) + "\n");
 
-        System.out.println(Ainit.norm2(x, b));
+        System.out.println("-----------NORM2-----------");
+        System.out.println("Norm2 = " + Ainit.norm2(x, b) + "\n");
 
-        System.out.println("---------------Jama Library--------------");
+        System.out.println("---------------JAMA LIBRARY--------------");
         Jama.Matrix matrix = new Jama.Matrix(readMatrix("matrix1.txt"));
         double[][] a = {{1}, {2}, {3}};
-        System.out.println(a.length);
-        System.out.println(a[0].length);
-        System.out.println(a[1].length);
         Jama.Matrix B = new Jama.Matrix(a);
 
-        B.print(2,3);
         Jama.Matrix result = matrix.solve(B);
+        System.out.println("System solution: x = ");
         result.transpose().print(10, 10);
 
+        System.out.println("inverse(A) = ");
+        matrix.inverse().print(5, 5);
         double norm1 = norm2(Arrays.copyOfRange(x, 1, x.length), result.transpose().getArray()[0]);
-        System.out.println(norm1);
+        System.out.println("Norm1 = " + norm1);
 
         double norm2 = norm2(Arrays.copyOfRange(x, 1, x.length), matrix.inverse().times(B).transpose().getArray()[0]);
-        System.out.println(norm2);
+        System.out.println("Norm2 = " + norm2);
 
     }
 

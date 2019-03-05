@@ -1,7 +1,9 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Scanner;
 
 public class SparseMatrix {
     private int n;
@@ -24,7 +26,7 @@ public class SparseMatrix {
         Scanner scanner = new Scanner(new File(filename));
 
         n = Integer.parseInt(scanner.nextLine());
-        while(scanner.hasNextLine()) {
+        while (scanner.hasNextLine()) {
             String[] lineItems = scanner.nextLine().split(", ");
 
             double value = Double.valueOf(lineItems[0]);
