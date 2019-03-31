@@ -2,10 +2,7 @@ package utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 public class SparseMatrix {
     private int n;
@@ -143,6 +140,91 @@ public class SparseMatrix {
         }
 
         return true;
+    }
+
+    public boolean isMainDiagonalNonZero() {
+        for (int i = 0; i < n; i++) {
+            Double value = get(i, i);
+            if (value == null) {
+                return false;
+            } else if (Math.abs(value) <= AlgebraUtils.getPrecision()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public Double get(int i, int j) {
+        return matrix.getOrDefault(i, Collections.emptyMap()).get(j);
+    }
+
+    public boolean hasDominantDiagonalRelativeToLines() {
+        for (Map.Entry<Integer, Map<Integer, Double>> line : matrix.entrySet()) {
+            double aii = 0.0;
+            double lineSum = 0.0;
+            for (Map.Entry<Integer, Double> column : line.getValue().entrySet()) {
+                int i = line.getKey();
+                int j = column.getKey();
+                if (i == j) {
+                    aii = column.getValue();
+                } else {
+                    lineSum += Math.abs(column.getValue());
+                }
+            }
+            if (Math.abs(aii) <= lineSum) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public double[] computeSolutionUsingSOR(double[] b, double omega) {
+        if (!this.isMainDiagonalNonZero()) {
+            throw new IllegalArgumentException("Cannot compute SOR. There is at least one 0 value on main diagonal.");
+        }
+
+        double deltaX;
+        double[] currentSolution = new double[n];
+        double[] previousSolution = new double[n];
+
+        int k = 0, kMax = 10_000;
+        do {
+            previousSolution = AlgebraUtils.getCopy(currentSolution);
+
+            for (Map.Entry<Integer, Map<Integer, Double>> line : matrix.entrySet()) {
+                int i = line.getKey();
+
+                double sum = 0, sum1 = 0, sum2 = 0;
+                for (Map.Entry<Integer, Double> column : line.getValue().entrySet()) {
+                    int j = column.getKey();
+                    double value = column.getValue();
+
+                    if (j < i) {
+                        sum1 += value * currentSolution[j];
+                    } else if (j > i){
+                        sum2 += value * previousSolution[j];
+                    }
+                }
+
+                Double aii = this.get(i, i);
+                currentSolution[i] = (1 - omega) * previousSolution[i] + (omega / aii) * (b[i] - sum1 - sum2);
+                System.out.println("New xSor[" + i + "]=" + currentSolution[i]);
+            }
+
+            k++;
+            deltaX = AlgebraUtils.computeNorm(previousSolution, currentSolution);
+            System.out.println("k: " + k);
+        } while (deltaX >= AlgebraUtils.getPrecision() && k <= kMax && deltaX <= Math.pow(10, 8));
+
+        // check if convergence is reached
+        if (deltaX < AlgebraUtils.getPrecision()) {
+            return currentSolution;
+        } else {
+            System.out.println("Diagonala dominanta: " + hasDominantDiagonalRelativeToLines());
+            throw new IllegalArgumentException("The solution cannot be approximated; it diverged.");
+        }
     }
 
     public boolean equal(SparseMatrix that) {

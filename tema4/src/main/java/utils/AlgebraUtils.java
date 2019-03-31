@@ -2,6 +2,7 @@ package utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class AlgebraUtils {
@@ -48,4 +49,24 @@ public class AlgebraUtils {
         return Math.abs(a - b) < precision;
     }
 
+    public static double computeNorm(double[] a, double[] b) {
+        int n = b.length;
+
+        double sum = 0.0;
+        for (int i = 0; i < n; i++) {
+            sum += Math.abs(a[i] - b[i]);
+        }
+
+        return sum;
+    }
+
+    public static void displayVector(double[] vector) {
+        for (double elem : vector) {
+            System.out.println(elem);
+        }
+    }
+
+    public static double[] getCopy(double[] a) {
+        return Arrays.copyOf(a, a.length);
+    }
 }
