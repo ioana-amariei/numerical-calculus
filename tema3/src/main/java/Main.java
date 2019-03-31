@@ -1,4 +1,3 @@
-import java.io.FileNotFoundException;
 import java.util.Arrays;
 
 public class Main {
@@ -13,9 +12,8 @@ public class Main {
         double[] Bb = AlgebraUtils.readVector("separated/b.vector.txt");
         double[] aoribb = AlgebraUtils.readVector("separated/aorib.vector.txt");
 
-
-        boolean maximulElementsPerLine = a.hasAtMostNonNullElementsOnEveryLine(12);
-        System.out.println("Max 12 elements per line respected: " + maximulElementsPerLine);
+        boolean maximumElementsPerLine = a.hasAtMostNonNullElementsOnEveryLine(12);
+        System.out.println("Max 12 elements per line respected: " + maximumElementsPerLine);
 //        System.out.println(a.getCompactVisualization());
 
         System.out.println("aplusbcalc = aplusb: " + a.add(b).equal(aplusb));
