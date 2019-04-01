@@ -184,6 +184,7 @@ public class SparseMatrix {
         if (!this.isMainDiagonalNonZero()) {
             throw new IllegalArgumentException("Cannot compute SOR. There is at least one 0 value on main diagonal.");
         }
+        System.out.println("Main diagonal has no 0 values.");
 
         double deltaX;
         double[] currentSolution = new double[n];
@@ -196,35 +197,49 @@ public class SparseMatrix {
             for (Map.Entry<Integer, Map<Integer, Double>> line : matrix.entrySet()) {
                 int i = line.getKey();
 
-                double sum = 0, sum1 = 0, sum2 = 0;
+                double sum1 = 0, sum2 = 0;
                 for (Map.Entry<Integer, Double> column : line.getValue().entrySet()) {
                     int j = column.getKey();
                     double value = column.getValue();
 
                     if (j < i) {
                         sum1 += value * currentSolution[j];
-                    } else if (j > i){
+                    } else if (j > i) {
                         sum2 += value * previousSolution[j];
                     }
                 }
 
                 Double aii = this.get(i, i);
                 currentSolution[i] = (1 - omega) * previousSolution[i] + (omega / aii) * (b[i] - sum1 - sum2);
-                System.out.println("New xSor[" + i + "]=" + currentSolution[i]);
             }
 
             k++;
             deltaX = AlgebraUtils.computeNorm(previousSolution, currentSolution);
-            System.out.println("k: " + k);
         } while (deltaX >= AlgebraUtils.getPrecision() && k <= kMax && deltaX <= Math.pow(10, 8));
+
+        System.out.println("Iterations = " + k);
 
         // check if convergence is reached
         if (deltaX < AlgebraUtils.getPrecision()) {
             return currentSolution;
         } else {
-            System.out.println("Diagonala dominanta: " + hasDominantDiagonalRelativeToLines());
+            System.out.println("Dominant diagonal: " + hasDominantDiagonalRelativeToLines());
             throw new IllegalArgumentException("The solution cannot be approximated; it diverged.");
         }
+    }
+
+    public double computeInfiniteNorm(double[] xSor, double[] b) {
+        double[] multipliedMatrixSor = times(xSor);
+        double max = multipliedMatrixSor[0] - b[0];
+
+        for (int i = 0; i < n; i++) {
+            double diff = multipliedMatrixSor[i] - b[i];
+            if(diff > max){
+                max = diff;
+            }
+        }
+
+        return max;
     }
 
     public boolean equal(SparseMatrix that) {
