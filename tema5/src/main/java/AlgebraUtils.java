@@ -1,6 +1,5 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class AlgebraUtils {
@@ -20,27 +19,6 @@ public class AlgebraUtils {
 
     public static double getPrecision() {
         return precision;
-    }
-
-    public static double[] generateXi(int n) {
-        double[] x = new double[n];
-
-        for (int i = 0; i < n; i++) {
-            x[i] = n - i;
-        }
-
-        return x;
-    }
-
-    public static boolean equal(double[] a, double[] b) {
-        int n = a.length;
-        for (int i = 0; i < n; i++) {
-            if (!equal(a[i], b[i])) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public static boolean equal(double a, double b) {
@@ -65,14 +43,6 @@ public class AlgebraUtils {
         }
 
         return Math.sqrt(sum);
-    }
-
-    public static void displayVector(double[] vector) {
-        System.out.println(Arrays.toString(vector));
-    }
-
-    public static double[] getCopy(double[] a) {
-        return Arrays.copyOf(a, a.length);
     }
 
     public static double[] generateVectorWithEuclideanNormOne(int n) {
